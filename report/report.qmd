@@ -337,7 +337,7 @@ calibrated energies, more realistic incident flux and diffusion dynamics without
 
 # Appendix A: Interactive simulator {.unnumbered}
 
-[Try the live Streamlit application](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/).
+[Try the live Streamlit application](https://thinfilmgrowth-rfdxpwxnkve7zp2ahtewyf.streamlit.app/).
 Choose a process module, set temperature, deposition rate and geometry, then run a wafer and inspect its
 growth history. Compare the recipe against the process of record (POR), replay the deposition, or review lot history.
 

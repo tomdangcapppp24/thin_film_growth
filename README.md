@@ -31,7 +31,7 @@ watch any model grow live.
   findings and limitations.
 * [Full PDF report](report/report.pdf): methods, validation, process windows, yield results and simulator screenshot.
 * [Project showcase](report/showcase.pdf) ([HTML](report/showcase.html), [QMD source](report/showcase.qmd)): a high-level portfolio overview with
-  the supplied simulator screenshot and [live app link](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/).
+  the supplied simulator screenshot and [live app link](https://thinfilmgrowth-rfdxpwxnkve7zp2ahtewyf.streamlit.app/).
 * [Beginner's guide](https://nhamhung.github.io/thin-film-growth/beginners-guide.html): a plain-language introduction
   to the science, simulations and main results.
 * [Simulator user guide](https://nhamhung.github.io/thin-film-growth/user-guide.html): a guided tour of the app with

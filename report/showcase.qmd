@@ -15,7 +15,7 @@ format:
 
 # Where can you find the project demo
 
-[**Open the live project demo**](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/)
+[**Open the live project demo**](https://thinfilmgrowth-rfdxpwxnkve7zp2ahtewyf.streamlit.app/)
 
 ![](images/simulator_showcase.png){width=80% fig-alt="Thin-film growth simulator with recipe controls, a process chamber and a simulated film cross-section."}
 
