@@ -4,16 +4,14 @@ subtitle: A Monte Carlo study of film roughness and trench voids, from random de
   filling
 date: today
 execute:
-  echo: true
+  echo: false
   warning: false
   message: false
 jupyter: python3
+bibliography: references.bib
 ---
 
-::: {.callout-tip}
-## Interactive application
-[Open the thin-film growth simulator](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/)
-:::
+
 
 ```{python}
 #| echo: false
@@ -60,26 +58,25 @@ por4 = pw4_16[(pw4_16["temperature"] == 420) & (pw4_16["flux"] == 1.0)].iloc[0]
 w8_best_void = pw4[pw4["trench_width"] == 8]["trench_void_area"].min()
 ```
 
-## Summary {.unnumbered}
+{{< pagebreak >}}
 
-* **The simulation reproduces exact theory.** Random deposition gives a growth exponent
-  β = `{python} f"{beta1:.3f}"` (theory 1/2). Adding surface relaxation gives β = `{python} f"{beta2:.3f}"`
-  and a saturation exponent α = `{python} f"{alpha2:.2f}"` (theory 1/4 and 1/2), the textbook
-  Edwards–Wilkinson behaviour.
-* **Heat smooths films and speed roughens them.** With temperature-activated hopping, roughness falls
-  `{python} f"{w_cold / w_hot:.0f}"`× from 250 K to its minimum, and rises `{python} f"{w_fast / w_slow:.0f}"`× when the
-  deposition rate goes from 0.01 to 1000 monolayers per second. Both act through one number: how many hops an atom
-  makes before the next one lands on it.
-* **Trench geometry matters more than temperature.** A trench twice as deep as it is wide traps a void at every
-  temperature and rate tested (smallest average void: `{python} f"{w8_best_void:.0f}"` cells). A trench as wide as it is deep
-  fills without voids once it is hot enough.
-* **A process of record (POR).** For the trench, 420 K at 1 ML/s is void-free on average with step coverage
-  `{python} f"{por4['step_coverage']:.2f}"`, and `{python} int(por_tr['sum'])` of `{python} int(por_tr['count'])` single wafers pass the spec.
-  For the 1D film, 375 K at 0.01 ML/s passes `{python} int(por_th['sum'])` of `{python} int(por_th['count'])`.
-* **Numba** makes the atom-by-atom loop `{python} f"{speedup:.0f}"`× faster than plain Python, which is what makes the
-  interactive app possible.
+# Abstract {.unnumbered}
 
-## Why thin films?
+This study uses progressively richer Monte Carlo models to examine how surface mobility and feature
+geometry control thin-film roughness and trench filling. Random deposition gives a growth exponent
+$\beta =$ `{python} f"{beta1:.3f}"`, compared with the exact value $1/2$. Adding surface relaxation gives
+$\beta =$ `{python} f"{beta2:.3f}"` and a saturation exponent $\alpha =$ `{python} f"{alpha2:.2f}"`,
+approximating the expected $1/4$ and $1/2$ scalings. Temperature and deposition-rate sweeps show that
+increasing the number of surface hops before burial generally reduces roughness. In the trench model,
+high aspect ratio can prevent void-free filling across the tested process window. A reference recipe
+for a 16 × 16-cell trench at 420 K and 1 ML/s passes `{python} int(por_tr['sum'])` of
+`{python} int(por_tr['count'])` simulated wafers; the flat-film reference passes
+`{python} int(por_th['sum'])` of `{python} int(por_th['count'])`. These results illustrate why process
+windows should be assessed with repeated runs and explicit acceptance criteria. The lattice,
+illustrative energy barriers and capped diffusion limit the findings to this model rather than a
+material-specific manufacturing process.
+
+# Introduction
 
 Every chip is built from films a few nanometres to a few hundred nanometres thick, stacked dozens of layers deep.
 They are deposited by sending atoms at a wafer (sputtering, evaporation) and letting them settle. Two things decide
@@ -97,7 +94,12 @@ Both depend on a race between two rates: how fast new atoms arrive, and how fast
 move to better positions. This report builds that race up one ingredient at a time, checking each step against
 known theory before adding the next.
 
-## The models
+The study addresses three questions: whether the simplest models recover their known growth laws;
+how temperature and deposition rate alter roughness; and how trench geometry changes the probability
+of meeting a filling specification. The relaxation results are interpreted in the Edwards–Wilkinson
+framework [@edwards1982] and the finite-size scaling framework of Family and Vicsek [@family1985].
+
+# Models and experimental design
 
 All models are **Monte Carlo** simulations: atoms arrive one at a time at random positions, and their behaviour is
 decided by random draws with physically motivated probabilities. Every run uses a fixed random seed, so all results
@@ -110,18 +112,24 @@ here can be regenerated exactly (`scripts/run_phase{1..4}.py`, `scripts/run_por_
 | 3 | Thermal hopping | Hops sideways with probability e^(−n·E_bond/kT) | How do temperature and rate set roughness? |
 | 4 | Trench fill (2D) | Sticks on first contact, then hops toward well-bonded sites | When does a trench trap a void? |
 
+The validation experiments average 30 random-deposition runs on 200 columns and 20 relaxation runs
+at each substrate width (25, 50, 100 and 200 columns). The trench process window averages eight runs
+per grid cell. Recipe acceptance is assessed separately over 30 seeded, single-wafer simulations,
+using the same criteria as the interactive application. Sweeps retain their recorded settings and
+seeds in `results/`; no experimental measurements are used.
+
 The 1D models describe a cross-section of a flat film as a row of columns; `heights[i]` is how many atoms are
 stacked in column i. Boundaries are periodic, so the row behaves like a ring with no edges.
 
-## Phase 1: random deposition, a validation baseline
+# Phase 1: random deposition, a validation baseline
 
 Each atom picks a column uniformly at random and sticks on top of it. Columns never interact, so after t atoms each
 column's height is a binomial random number and the width follows exactly
 
 $$W(t) = \sqrt{\theta\,(1 - 1/N)}, \qquad \theta = t/N \text{ monolayers.}$$
 
-On a log–log plot this is a straight line of slope **β = 1/2**. The simulation (200 columns, 30 runs averaged)
-gives β = `{python} f"{beta1:.4f} ± {beta1_err:.4f}"` and matches the exact curve to within 5% at every time. This
+On a log–log plot this is a straight line of slope **$\beta = 1/2$**. The simulation (200 columns, 30 runs averaged)
+gives $\beta =$ `{python} f"{beta1:.4f} ± {beta1_err:.4f}"` and matches the exact curve to within 5% at every time. This
 confirms that the deposition loop, the roughness measurement and the fitting code are correct.
 
 ![Random deposition: roughness grows as t^1/2 and never stops.](../results/phase1_random_deposition/figure.png){width=70%}
@@ -129,7 +137,7 @@ confirms that the deposition loop, the roughness measurement and the fitting cod
 The width **never saturates**. Because no column is affected by its neighbours, nothing limits how far apart
 neighbouring heights can drift. Real films do not behave like this, which is the motivation for Phase 2.
 
-## Phase 2: surface relaxation
+# Phase 2: surface relaxation
 
 Now a landed atom checks its two neighbours and rolls into a lower one (picking at random if both are lower). This
 one local rule is the simplest form of surface diffusion, and it changes the large-scale behaviour completely.
@@ -148,12 +156,12 @@ for ax in axes: ax.legend(fontsize=8); ax.grid(True, which="both", alpha=.3)
 plt.tight_layout(); plt.show()
 ```
 
-* **Slower growth:** β = `{python} f"{beta2:.3f}"` (theory 1/4), fitted over the first 100 monolayers on 200 columns.
+* **Slower growth:** $\beta =$ `{python} f"{beta2:.3f}"` (theory 1/4), fitted over the first 100 monolayers on 200 columns.
 * **Saturation:** once height differences have spread across the whole substrate, the width stops growing. The
-  plateau scales as W_sat ∝ L^α with α = `{python} f"{alpha2:.2f}"` (theory 1/2), and the time to reach it as L².
-  Rescaling time by L² and width by L^½ collapses all four curves onto one (see
-  `results/phase2_surface_relaxation/figure.png`). This is the Family–Vicsek scaling that defines the
-  Edwards–Wilkinson universality class.
+  plateau scales as $W_\mathrm{sat} \propto L^\alpha$ with $\alpha =$ `{python} f"{alpha2:.2f}"` (theory 1/2), and the time to reach it as $L^2$.
+  Rescaling time by $L^2$ and width by $L^{1/2}$ collapses all four curves onto one (see
+  `results/phase2_surface_relaxation/figure.png`). This is the Family–Vicsek scaling form [@family1985], with exponents expected for
+  Edwards–Wilkinson growth [@edwards1982].
 
 **Why Numba.** In Phase 1 the order of arrivals did not matter, so atoms could be added in bulk with NumPy. Here
 each atom's destination depends on the surface it finds, so atoms must be processed one by one in a loop. Compiling
@@ -161,25 +169,25 @@ that loop with Numba's `@njit` runs it at `{python} f"{timing['atoms_per_second'
 `{python} f"{timing['atoms_per_second'].iloc[0]:.2e}"`, a **`{python} f"{speedup:.0f}"`× speed-up**. A test checks that both versions
 build exactly the same film from the same random numbers.
 
-## Phase 3: temperature and deposition rate
+# Phase 3: temperature and deposition rate
 
-### The physics
+## The physics
 
 Between landings, surface atoms try to hop sideways. A hop succeeds with probability
 
 $$P_\text{hop} = e^{-n\,E_\text{bond}/kT},$$
 
-where n ∈ {0, 1, 2} is the number of side neighbours at the atom's height. An isolated atom on a flat terrace hops
+where $n \in \{0, 1, 2\}$ is the number of side neighbours at the atom's height. An isolated atom on a flat terrace hops
 freely; an atom tucked against a step is held more strongly. Real conditions map onto two simulation numbers:
 
-* **ε = E_bond / kT**: how sticky bonds are compared with the thermal energy.
-* **hops per landing = ν₀·e^(−E_diff/kT) / F**: the Arrhenius hop rate of a free atom divided by the arrival rate F.
+* **$\epsilon = E_\mathrm{bond}/(kT)$**: how sticky bonds are compared with the thermal energy.
+* **Hops per landing:** $\nu_0\exp[-E_\mathrm{diff}/(kT)]/F$. the Arrhenius hop rate of a free atom divided by the arrival rate F.
   It counts how many moves an atom gets before the next layer buries it.
 
-The barriers are illustrative (E_bond = 0.2 eV, E_diff = 0.8 eV, ν₀ = 10¹³ s⁻¹), so temperatures are meaningful
+The barriers are illustrative (E_bond = 0.2 eV, E_diff = 0.8 eV, $\nu_0 = 10^{13}\ \mathrm{s}^{-1}$), so temperatures are meaningful
 relative to the model rather than for a specific metal.
 
-### Results
+## Results
 
 ```{python}
 #| label: fig-thermal
@@ -194,16 +202,16 @@ plt.tight_layout(); plt.show()
 ```
 
 * Heating from 250 K to 450 K cuts roughness from `{python} f"{w_cold:.1f}"` to `{python} f"{w_hot:.1f}"` atoms.
-* Slowing deposition 10⁵-fold at 375 K cuts it from `{python} f"{w_fast:.1f}"` to `{python} f"{w_slow:.1f}"`.
+* Slowing deposition $10^5$-fold at 375 K cuts it from `{python} f"{w_fast:.1f}"` to `{python} f"{w_slow:.1f}"`.
 * **Temperature and rate are interchangeable** through the hop count. Every +40 K buys roughly 10× faster
   deposition at the same roughness. This is the trade-off fabs face between substrate heating (thermal budget) and
   throughput.
 * **Bonds matter as much as mobility.** In the dimensionless model at 100 hops per landing, removing bonding
-  entirely (ε = 0) makes the film *much* rougher (W = `{python} f"{e_sweep['roughness'].iloc[0]:.0f}"`). Atoms then wander uphill as
-  easily as downhill. Even weak bonding (ε = 1) gives W = `{python} f"{e_sweep['roughness'].iloc[1]:.1f}"`: smoothing needs atoms that move
+  entirely ($\epsilon = 0$) makes the film *much* rougher (W = `{python} f"{e_sweep['roughness'].iloc[0]:.0f}"`). Atoms then wander uphill as
+  easily as downhill. Even weak bonding ($\epsilon = 1$) gives W = `{python} f"{e_sweep['roughness'].iloc[1]:.1f}"`: smoothing needs atoms that move
   *and* stay put once they find a good site.
 
-### Process window and recipe
+## Process window and recipe
 
 A grid over temperature × rate (`results/phase3_process_window`) finds the smoothest film at **375 K and
 0.01 ML/s**. That is the coolest temperature at which slow deposition still gives the maximum number of hops while
@@ -211,23 +219,23 @@ bonds stay strong.
 
 ![Roughness over the temperature × rate grid. The red box marks the POR.](../results/phase3_process_window/figure.png){width=65%}
 
-## Phase 4: filling a trench
+# Phase 4: filling a trench
 
-### The physics
+## The physics
 
 This is a 2D side view of a wafer with a rectangular trench. Atoms fall straight down and **stick on first contact**,
 below or beside them. Atoms grazing the trench's top corners stick to the corner's side, so the film grows sideways
 from both corners as **overhangs**. If the overhangs meet before the bottom fills, they seal a void.
 
 Temperature enters as in Phase 3: each new atom gets a number of hop attempts, succeeds with probability
-e^(−n·ε) for n filled neighbours, and moves to the neighbouring empty cell with the most bonds. Hot atoms therefore
+$e^{-n\epsilon}$ for n filled neighbours, and moves to the neighbouring empty cell with the most bonds. Hot atoms therefore
 drift into corners and along the trench floor. Voids are found by a **flood fill** from the open space above: any
 empty cell the flood cannot reach is sealed. (This model uses a weaker bond, E_bond = 0.1 eV. At 0.2 eV, bonded
 atoms in 2D barely move and every trench voids.)
 
 ![Cross-sections after 24 monolayers (red = void). Cold films are porous and seal immediately; at 370 K the film is dense but overhangs still trap a void; from about 430 K atoms reach the bottom and the trench fills, although a narrow seam can stay open to the surface (open space, so not counted as a void).](../results/phase4_cross_sections/figure.png)
 
-### Temperature and width
+## Temperature and width
 
 ```{python}
 #| label: fig-trench
@@ -257,7 +265,7 @@ corners are close together, so the overhangs meet after only a few monolayers. T
 atoms can carry enough material to the bottom. Fabs face the same limit: line-of-sight deposition cannot fill
 high-aspect-ratio features, which is why they turn to reflow, atomic layer deposition or electroplating.
 
-### Process window and recipe
+## Process window and recipe
 
 A grid over width × temperature × rate (`results/phase4_process_window`, 8 runs per cell) gives the POR:
 **16 × 16 trench, 420 K, 1 ML/s**. It is void-free on average with coverage `{python} f"{por4['step_coverage']:.2f}"`.
@@ -265,10 +273,13 @@ That is within noise of the best coverage found, at a temperature 100 K lower th
 
 ![Void area (top) and step coverage (bottom) over the process window; the red box marks the POR.](../results/phase4_process_window/figure.png)
 
-## From averages to wafers: yield
+# From averages to wafers: yield
 
 A spec applies to each wafer, not to an average. So the right question is *what fraction of single wafers pass?*
-Each recipe was run with 30 seeds exactly as the app runs it (`results/por_yield`):
+Each recipe was run with 30 seeds exactly as the app runs it (`results/por_yield`). A flat film passes
+when $R_q \leq 2.0$ atoms at 100 ML. A trench passes when there are no sealed trench voids and step
+coverage is at least 0.50. The results below are empirical pass fractions over these seeds, not
+manufacturing yield estimates:
 
 ```{python}
 #| label: tbl-yield
@@ -276,7 +287,7 @@ Each recipe was run with 30 seeds exactly as the app runs it (`results/por_yield
 tbl = passes.reset_index().rename(columns={"sum": "passed", "count": "wafers"})
 tbl["spec"] = tbl["module"].map(lambda m: fab.SPECS[m]["text"])
 tbl["yield"] = (100 * tbl["passed"] / tbl["wafers"]).round().astype(int).astype(str) + "%"
-tbl[["module", "recipe", "spec", "passed", "wafers", "yield"]]
+tbl[["module", "recipe", "passed", "wafers", "yield"]]
 ```
 
 * The 1D POR passes every wafer. Its fast alternative (450 K, 1 ML/s) is 100× faster but passes only 80%.
@@ -284,19 +295,47 @@ tbl[["module", "recipe", "spec", "passed", "wafers", "yield"]]
   Spread between wafers made with the same recipe is a real feature of growth, and it is why averages alone can
   mislead. A recipe that is void-free on average at 460 K and 10 ML/s passes only about half its wafers.
 
-## Limitations
+# Discussion
 
-* **Lattice units.** 1 cell = 1 atom. The nanometre values in the app assume 1 monolayer ≈ 0.3 nm and are
+The flat-film and trench experiments separate two mechanisms. Greater surface mobility gives atoms
+more opportunities to find well-bonded sites, reducing roughness in the thermal model. In a trench,
+however, the opening may close before enough material reaches the bottom. Improving mobility does
+not remove every geometric constraint, so smooth or dense films are not sufficient evidence of
+successful feature filling.
+
+The distinction between averages and individual runs is also consequential. The trench reference
+has zero mean sealed-void area in its process-window sample, yet only 24 of 30 wafers pass the
+combined void and coverage criteria in the separate yield experiment. Selecting a recipe therefore
+requires both a process-window search and repeated evaluation against the full specification.
+The 30-seed pass fractions should be interpreted as finite simulation samples.
+
+The numerical hop cap further limits extrapolation. Once diffusion attempts reach the cap, increasing
+temperature can weaken bonding without increasing the simulated mobility proportionally. The
+high-temperature upturn in void area should therefore be interpreted as a feature of the capped
+model, not as a general material law.
+
+# Limitations
+
+* **Lattice units.** 1 cell = 1 atom. The nanometre values in the app assume $1\ \mathrm{ML} \approx 0.3\ \mathrm{nm}$ and are
   illustrative only.
 * **Illustrative energies.** E_bond and E_diff are not fitted to any material, so only relative temperatures are
   meaningful.
-* **Capped hops.** Runs are capped at 10⁴ hops per landing in 1D and 3000 per atom in 2D. The upturn in trench voids
+* **Capped hops.** Runs are capped at $10^4$ hops per landing in 1D and 3000 per atom in 2D. The upturn in trench voids
   above about 460 K comes from this cap. A rejection-free kinetic Monte Carlo would remove it.
 * **Simplified 2D motion.** Only the newest atom hops, and atoms arrive straight down. Real sputtering has an
   angular spread, which affects overhang growth directly.
 * **Open seams.** A narrow seam that stays open to the surface is not counted as a void, by definition.
 
-## Interactive simulator {.unnumbered}
+# Conclusion
+
+The simulation recovers the expected approximate roughening scalings of its validation models and
+connects thermal mobility to roughness and trench filling. Within the tested grids, trench aspect
+ratio is a stronger constraint than temperature alone. Repeated runs show that an average process
+window does not establish reliable single-wafer acceptance. The resulting reference recipes are useful
+for exploring these relationships in the simulator, while material-specific prediction would require
+calibrated energies, more realistic incident flux and diffusion dynamics without the present hop cap.
+
+# Appendix A: Interactive simulator {.unnumbered}
 
 [Try the live Streamlit application](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/).
 Choose a process module, set temperature, deposition rate and geometry, then run a wafer and inspect its
@@ -307,15 +346,20 @@ growth history. Compare the recipe against the process of record (POR), replay t
 This is an example of a failed recipe, distinct from the trench POR (16 × 16 cells, 420 K, 1 ML/s).
 It shows why high film density (0.99 here) alone does not establish successful trench filling.
 
-## Reproducing this report
+# Appendix B: Reproducibility {.unnumbered}
 
 ```bash
 python3.12 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 for p in 1 2 3 4; do PYTHONPATH=src python scripts/run_phase$p.py; done
 PYTHONPATH=src python scripts/run_por_yield.py
 cd report
-QUARTO_PYTHON=../.venv/bin/python quarto render report.qmd
-QUARTO_PYTHON=../.venv/bin/python quarto render showcase.qmd
+QUARTO_PYTHON=../.venv/bin/python quarto render report.qmd --to all
+QUARTO_PYTHON=../.venv/bin/python quarto render showcase.qmd --to all
 ```
 
 Every result folder holds `settings.json` with the inputs, seed, fitted values and library versions.
+
+# References {.unnumbered}
+
+::: {#refs}
+:::

@@ -1,41 +1,34 @@
 ---
 title: Thin Film Growth Simulator
-subtitle: An interactive look at how materials take shape
-date: today
+subtitle: Project showcase
+format:
+  html:
+    toc: false
+    number-sections: false
+    code-tools: false
+  pdf:
+    toc: false
+    number-sections: false
+    fontsize: 10pt
+    geometry: margin=1in
 ---
 
-::: {.callout-tip}
-## Interactive application
-[Open the Streamlit app](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/)
-:::
+# Where can you find the project demo
 
-## Summary {.unnumbered}
+[**Open the live project demo**](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/)
 
-Thin films are the building blocks of many electronic devices. Their quality depends on how material
-settles onto a surface—and whether it reaches the small features underneath.
+![](images/simulator_showcase.png){width=80% fig-alt="Thin-film growth simulator with recipe controls, a process chamber and a simulated film cross-section."}
 
-![The simulator brings the process, the growing film and the final inspection together in one view.](images/simulator_showcase.png){width=100% fig-alt="Thin-film growth simulator showing recipe controls, a process chamber, inspection readouts and a simulated cross-section of a deposited film."}
+# What this project is about
 
-{{< pagebreak >}}
+This project makes thin-film growth visible and interactive. It explores how material settles onto a
+surface and why a layer that looks solid can still hide an empty pocket underneath. Users can
+experiment with different conditions and see how they change the finished film.
 
-## The project
+# What are some key features
 
-This interactive simulator makes an invisible process visible. Watch a film grow, explore how different
-conditions change its shape, and see why a layer that looks solid can still hide an empty pocket below
-the surface.
-
-
-## Explore it yourself
-
-* **Choose a recipe.** Adjust the conditions and the shape of the surface.
-* **Watch the growth.** Follow the process and replay how the film forms.
-* **Compare the outcome.** Inspect the finished layer and see how a different recipe changes the result.
-
-## Why it matters
-
-The project turns an abstract materials-science problem into a visual, hands-on experience. It connects
-scientific ideas with the practical challenge of making reliable films, inviting users to learn through
-experimentation.
-
-[**Try the live simulator**](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/)
-
+* **Adjustable recipes:** explore different growth conditions and surface shapes.
+* **Visual growth and replay:** watch a film form and revisit earlier stages.
+* **Film inspection:** examine the finished surface and its cross-section.
+* **Recipe comparison:** compare your choices with a reference recipe.
+* **Lot history:** review and compare earlier simulation runs.

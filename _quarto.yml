@@ -4,8 +4,6 @@ project:
   render:
   - report/report.qmd
   - report/showcase.qmd
-  post-render:
-  - scripts/export_pdfs.py
 format:
   html:
     theme:
@@ -27,3 +25,10 @@ format:
     fig-height: 4.5
     embed-resources: true
     smooth-scroll: true
+  pdf:
+    toc: true
+    number-sections: true
+    pdf-engine: lualatex
+    echo: false
+    toc-depth: 1
+    latex-min-runs: 3

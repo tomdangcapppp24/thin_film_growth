@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Render both QMD sources with the portfolio theme and export matching PDFs.
+"""Render both QMD sources to native research PDFs and companion HTML.
 
-Quarto runs scripts/export_pdfs.py automatically after rendering the HTML.
+Requires Quarto and a TeX distribution (install with `quarto install tinytex`).
 Pass --quarto /path/to/quarto to use a CLI that is not on PATH.
 """
 
@@ -24,7 +24,7 @@ def main():
     env = os.environ.copy()
     env["QUARTO_PYTHON"] = sys.executable
     subprocess.run(
-        [args.quarto, "render", "--to", "html", "--execute-daemon", "0"],
+        [args.quarto, "render", "--to", "all", "--execute-daemon", "0"],
         cwd=ROOT,
         env=env,
         check=True,

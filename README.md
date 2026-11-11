@@ -37,29 +37,28 @@ watch any model grow live.
 * [Simulator user guide](https://nhamhung.github.io/thin-film-growth/user-guide.html): a guided tour of the app with
   screenshots, three hands-on experiments, troubleshooting and a glossary.
 
-Both reports are generated from Quarto Markdown: `report/report.qmd` (full report) and
-`report/showcase.qmd` (high-level showcase). They share the exact HTML theme settings and style files
-from `soccer_xg`. Quarto's post-render hook exports the styled HTML to US Letter PDFs, matching the
-checked-in `soccer_xg` PDF's fonts, banner, headings, tables and print layout.
+Both reports are generated from Quarto Markdown: `report/report.qmd` (research report) and
+`report/showcase.qmd` (high-level showcase). The PDFs use Quarto's native LuaLaTeX research-document
+format, matching `recommendation_showcase`: a plain title block, serif body text, numbered research
+sections, equations, figures and a table of contents. The research report adds an abstract, discussion,
+conclusion and bibliography. The showcase contains only the demo, project description and key features.
 
-Install [Quarto](https://quarto.org/docs/get-started/) and Chrome/Chromium, then run:
+Install [Quarto](https://quarto.org/docs/get-started/) and its TeX dependency, then render:
 
 ```bash
+quarto install tinytex
 .venv/bin/python scripts/render_pdfs.py
 ```
 
-The helper invokes `quarto render --to html` and sets `QUARTO_PYTHON` to the current Python interpreter.
-The shared `_quarto.yml` configuration runs `scripts/export_pdfs.py` after rendering, so both HTML and
-PDF are rebuilt from the QMD sources in one command. The hook waits for fonts, images and equations
-before printing; it does not rewrite the HTML or introduce a separate PDF design.
-Use `--quarto /path/to/quarto` if Quarto is not on PATH, or `CHROME_PATH` for a custom browser executable.
-The hook uses `websocket-client`, included in the project's JupyterLab environment.
+The helper invokes `quarto render --to all` and sets `QUARTO_PYTHON` to the current Python interpreter.
+HTML and native PDFs are rebuilt from the same QMD sources. The PDFs use the standard LaTeX template;
+HTML retains the interactive portfolio theme. Use `--quarto /path/to/quarto` if Quarto is not on PATH.
 Edit the `.qmd` sources rather than the generated HTML or PDFs. You can also run Quarto directly:
 
 ```bash
 cd report
-QUARTO_PYTHON=../.venv/bin/python quarto render report.qmd
-QUARTO_PYTHON=../.venv/bin/python quarto render showcase.qmd
+QUARTO_PYTHON=../.venv/bin/python quarto render report.qmd --to all
+QUARTO_PYTHON=../.venv/bin/python quarto render showcase.qmd --to all
 ```
 
 The full report executes its analysis cells against saved results; the showcase is plain prose and an image.
