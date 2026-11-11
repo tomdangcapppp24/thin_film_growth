@@ -1,0 +1,41 @@
+---
+title: Thin Film Growth Simulator
+subtitle: An interactive look at how materials take shape
+date: today
+---
+
+::: {.callout-tip}
+## Interactive application
+[Open the Streamlit app](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/)
+:::
+
+## Summary {.unnumbered}
+
+Thin films are the building blocks of many electronic devices. Their quality depends on how material
+settles onto a surface—and whether it reaches the small features underneath.
+
+![The simulator brings the process, the growing film and the final inspection together in one view.](images/simulator_showcase.png){width=100% fig-alt="Thin-film growth simulator showing recipe controls, a process chamber, inspection readouts and a simulated cross-section of a deposited film."}
+
+{{< pagebreak >}}
+
+## The project
+
+This interactive simulator makes an invisible process visible. Watch a film grow, explore how different
+conditions change its shape, and see why a layer that looks solid can still hide an empty pocket below
+the surface.
+
+
+## Explore it yourself
+
+* **Choose a recipe.** Adjust the conditions and the shape of the surface.
+* **Watch the growth.** Follow the process and replay how the film forms.
+* **Compare the outcome.** Inspect the finished layer and see how a different recipe changes the result.
+
+## Why it matters
+
+The project turns an abstract materials-science problem into a visual, hands-on experience. It connects
+scientific ideas with the practical challenge of making reliable films, inviting users to learn through
+experimentation.
+
+[**Try the live simulator**](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/)
+

@@ -1,32 +1,19 @@
 ---
-title: "How Thin Films Grow"
-subtitle: "A Monte Carlo study of film roughness and trench voids, from random deposition to a process window for void-free filling"
-author: "Your Name"
+title: How Thin Films Grow
+subtitle: A Monte Carlo study of film roughness and trench voids, from random deposition to a process window for void-free
+  filling
 date: today
-format:
-  html:
-    theme:
-      light: flatly
-      dark: darkly
-    css: styles.css
-    toc: true
-    toc-location: left
-    toc-depth: 3
-    number-sections: true
-    code-fold: true
-    code-tools: true
-    code-copy: true
-    title-block-banner: true
-    fig-width: 7.5
-    fig-height: 4.2
-    embed-resources: true
-    smooth-scroll: true
 execute:
   echo: true
   warning: false
   message: false
-jupyter: thin-film-growth
+jupyter: python3
 ---
+
+::: {.callout-tip}
+## Interactive application
+[Open the thin-film growth simulator](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/)
+:::
 
 ```{python}
 #| echo: false
@@ -73,8 +60,7 @@ por4 = pw4_16[(pw4_16["temperature"] == 420) & (pw4_16["flux"] == 1.0)].iloc[0]
 w8_best_void = pw4[pw4["trench_width"] == 8]["trench_void_area"].min()
 ```
 
-::: {.callout-note appearance="simple"}
-## Summary
+## Summary {.unnumbered}
 
 * **The simulation reproduces exact theory.** Random deposition gives a growth exponent
   β = `{python} f"{beta1:.3f}"` (theory 1/2). Adding surface relaxation gives β = `{python} f"{beta2:.3f}"`
@@ -92,9 +78,8 @@ w8_best_void = pw4[pw4["trench_width"] == 8]["trench_void_area"].min()
   For the 1D film, 375 K at 0.01 ML/s passes `{python} int(por_th['sum'])` of `{python} int(por_th['count'])`.
 * **Numba** makes the atom-by-atom loop `{python} f"{speedup:.0f}"`× faster than plain Python, which is what makes the
   interactive app possible.
-:::
 
-# Why thin films?
+## Why thin films?
 
 Every chip is built from films a few nanometres to a few hundred nanometres thick, stacked dozens of layers deep.
 They are deposited by sending atoms at a wafer (sputtering, evaporation) and letting them settle. Two things decide
@@ -112,7 +97,7 @@ Both depend on a race between two rates: how fast new atoms arrive, and how fast
 move to better positions. This report builds that race up one ingredient at a time, checking each step against
 known theory before adding the next.
 
-# The models
+## The models
 
 All models are **Monte Carlo** simulations: atoms arrive one at a time at random positions, and their behaviour is
 decided by random draws with physically motivated probabilities. Every run uses a fixed random seed, so all results
@@ -128,7 +113,7 @@ here can be regenerated exactly (`scripts/run_phase{1..4}.py`, `scripts/run_por_
 The 1D models describe a cross-section of a flat film as a row of columns; `heights[i]` is how many atoms are
 stacked in column i. Boundaries are periodic, so the row behaves like a ring with no edges.
 
-# Phase 1: random deposition, a validation baseline
+## Phase 1: random deposition, a validation baseline
 
 Each atom picks a column uniformly at random and sticks on top of it. Columns never interact, so after t atoms each
 column's height is a binomial random number and the width follows exactly
@@ -144,7 +129,7 @@ confirms that the deposition loop, the roughness measurement and the fitting cod
 The width **never saturates**. Because no column is affected by its neighbours, nothing limits how far apart
 neighbouring heights can drift. Real films do not behave like this, which is the motivation for Phase 2.
 
-# Phase 2: surface relaxation
+## Phase 2: surface relaxation
 
 Now a landed atom checks its two neighbours and rolls into a lower one (picking at random if both are lower). This
 one local rule is the simplest form of surface diffusion, and it changes the large-scale behaviour completely.
@@ -176,9 +161,9 @@ that loop with Numba's `@njit` runs it at `{python} f"{timing['atoms_per_second'
 `{python} f"{timing['atoms_per_second'].iloc[0]:.2e}"`, a **`{python} f"{speedup:.0f}"`× speed-up**. A test checks that both versions
 build exactly the same film from the same random numbers.
 
-# Phase 3: temperature and deposition rate
+## Phase 3: temperature and deposition rate
 
-## The physics
+### The physics
 
 Between landings, surface atoms try to hop sideways. A hop succeeds with probability
 
@@ -194,7 +179,7 @@ freely; an atom tucked against a step is held more strongly. Real conditions map
 The barriers are illustrative (E_bond = 0.2 eV, E_diff = 0.8 eV, ν₀ = 10¹³ s⁻¹), so temperatures are meaningful
 relative to the model rather than for a specific metal.
 
-## Results
+### Results
 
 ```{python}
 #| label: fig-thermal
@@ -218,7 +203,7 @@ plt.tight_layout(); plt.show()
   easily as downhill. Even weak bonding (ε = 1) gives W = `{python} f"{e_sweep['roughness'].iloc[1]:.1f}"`: smoothing needs atoms that move
   *and* stay put once they find a good site.
 
-## Process window and recipe
+### Process window and recipe
 
 A grid over temperature × rate (`results/phase3_process_window`) finds the smoothest film at **375 K and
 0.01 ML/s**. That is the coolest temperature at which slow deposition still gives the maximum number of hops while
@@ -226,9 +211,9 @@ bonds stay strong.
 
 ![Roughness over the temperature × rate grid. The red box marks the POR.](../results/phase3_process_window/figure.png){width=65%}
 
-# Phase 4: filling a trench
+## Phase 4: filling a trench
 
-## The physics
+### The physics
 
 This is a 2D side view of a wafer with a rectangular trench. Atoms fall straight down and **stick on first contact**,
 below or beside them. Atoms grazing the trench's top corners stick to the corner's side, so the film grows sideways
@@ -242,7 +227,7 @@ atoms in 2D barely move and every trench voids.)
 
 ![Cross-sections after 24 monolayers (red = void). Cold films are porous and seal immediately; at 370 K the film is dense but overhangs still trap a void; from about 430 K atoms reach the bottom and the trench fills, although a narrow seam can stay open to the surface (open space, so not counted as a void).](../results/phase4_cross_sections/figure.png)
 
-## Temperature and width
+### Temperature and width
 
 ```{python}
 #| label: fig-trench
@@ -272,7 +257,7 @@ corners are close together, so the overhangs meet after only a few monolayers. T
 atoms can carry enough material to the bottom. Fabs face the same limit: line-of-sight deposition cannot fill
 high-aspect-ratio features, which is why they turn to reflow, atomic layer deposition or electroplating.
 
-## Process window and recipe
+### Process window and recipe
 
 A grid over width × temperature × rate (`results/phase4_process_window`, 8 runs per cell) gives the POR:
 **16 × 16 trench, 420 K, 1 ML/s**. It is void-free on average with coverage `{python} f"{por4['step_coverage']:.2f}"`.
@@ -280,7 +265,7 @@ That is within noise of the best coverage found, at a temperature 100 K lower th
 
 ![Void area (top) and step coverage (bottom) over the process window; the red box marks the POR.](../results/phase4_process_window/figure.png)
 
-# From averages to wafers: yield
+## From averages to wafers: yield
 
 A spec applies to each wafer, not to an average. So the right question is *what fraction of single wafers pass?*
 Each recipe was run with 30 seeds exactly as the app runs it (`results/por_yield`):
@@ -299,7 +284,7 @@ tbl[["module", "recipe", "spec", "passed", "wafers", "yield"]]
   Spread between wafers made with the same recipe is a real feature of growth, and it is why averages alone can
   mislead. A recipe that is void-free on average at 460 K and 10 ML/s passes only about half its wafers.
 
-# Limitations
+## Limitations
 
 * **Lattice units.** 1 cell = 1 atom. The nanometre values in the app assume 1 monolayer ≈ 0.3 nm and are
   illustrative only.
@@ -311,13 +296,26 @@ tbl[["module", "recipe", "spec", "passed", "wafers", "yield"]]
   angular spread, which affects overhang growth directly.
 * **Open seams.** A narrow seam that stays open to the surface is not counted as a void, by definition.
 
-# Reproducing this report
+## Interactive simulator {.unnumbered}
+
+[Try the live Streamlit application](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/).
+Choose a process module, set temperature, deposition rate and geometry, then run a wafer and inspect its
+growth history. Compare the recipe against the process of record (POR), replay the deposition, or review lot history.
+
+![The simulator at inspection, using the supplied screenshot. A 12-cell-wide, 16-cell-deep trench at 375 K and 1 ML/s fails: 100 void cells and step coverage 0.42, against a requirement of zero void cells and coverage at least 0.50. The SEM-style cross-section is simulated, and its nanometre scale is illustrative.](images/simulator_showcase.png){width=100%}
+
+This is an example of a failed recipe, distinct from the trench POR (16 × 16 cells, 420 K, 1 ML/s).
+It shows why high film density (0.99 here) alone does not establish successful trench filling.
+
+## Reproducing this report
 
 ```bash
 python3.12 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
 for p in 1 2 3 4; do PYTHONPATH=src python scripts/run_phase$p.py; done
 PYTHONPATH=src python scripts/run_por_yield.py
-cd report && QUARTO_PYTHON=../.venv/bin/python quarto render report.qmd
+cd report
+QUARTO_PYTHON=../.venv/bin/python quarto render report.qmd
+QUARTO_PYTHON=../.venv/bin/python quarto render showcase.qmd
 ```
 
 Every result folder holds `settings.json` with the inputs, seed, fitted values and library versions.

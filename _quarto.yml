@@ -1,0 +1,29 @@
+project:
+  type: default
+  execute-dir: file
+  render:
+  - report/report.qmd
+  - report/showcase.qmd
+  post-render:
+  - scripts/export_pdfs.py
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    css:
+    - report/styles.css
+    - report/theme-base.css
+    - report/project-theme.css
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    code-tools: true
+    code-copy: true
+    title-block-banner: true
+    fig-width: 7.5
+    fig-height: 4.5
+    embed-resources: true
+    smooth-scroll: true

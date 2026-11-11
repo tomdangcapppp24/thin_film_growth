@@ -29,12 +29,42 @@ watch any model grow live.
 
 * [Project report](https://nhamhung.github.io/thin-film-growth/) (*How Thin Films Grow*): methods, key results,
   findings and limitations.
+* [Full PDF report](report/report.pdf): methods, validation, process windows, yield results and simulator screenshot.
+* [Project showcase](report/showcase.pdf) ([HTML](report/showcase.html), [QMD source](report/showcase.qmd)): a high-level portfolio overview with
+  the supplied simulator screenshot and [live app link](https://spark-gcp-project-fsxajnsohm7ep7vjgaztix.streamlit.app/).
 * [Beginner's guide](https://nhamhung.github.io/thin-film-growth/beginners-guide.html): a plain-language introduction
   to the science, simulations and main results.
 * [Simulator user guide](https://nhamhung.github.io/thin-film-growth/user-guide.html): a guided tour of the app with
   screenshots, three hands-on experiments, troubleshooting and a glossary.
 
-Render with `cd report && QUARTO_PYTHON=../.venv/bin/python quarto render report.qmd && quarto render user_guide.qmd`.
+Both reports are generated from Quarto Markdown: `report/report.qmd` (full report) and
+`report/showcase.qmd` (high-level showcase). They share the exact HTML theme settings and style files
+from `soccer_xg`. Quarto's post-render hook exports the styled HTML to US Letter PDFs, matching the
+checked-in `soccer_xg` PDF's fonts, banner, headings, tables and print layout.
+
+Install [Quarto](https://quarto.org/docs/get-started/) and Chrome/Chromium, then run:
+
+```bash
+.venv/bin/python scripts/render_pdfs.py
+```
+
+The helper invokes `quarto render --to html` and sets `QUARTO_PYTHON` to the current Python interpreter.
+The shared `_quarto.yml` configuration runs `scripts/export_pdfs.py` after rendering, so both HTML and
+PDF are rebuilt from the QMD sources in one command. The hook waits for fonts, images and equations
+before printing; it does not rewrite the HTML or introduce a separate PDF design.
+Use `--quarto /path/to/quarto` if Quarto is not on PATH, or `CHROME_PATH` for a custom browser executable.
+The hook uses `websocket-client`, included in the project's JupyterLab environment.
+Edit the `.qmd` sources rather than the generated HTML or PDFs. You can also run Quarto directly:
+
+```bash
+cd report
+QUARTO_PYTHON=../.venv/bin/python quarto render report.qmd
+QUARTO_PYTHON=../.venv/bin/python quarto render showcase.qmd
+```
+
+The full report executes its analysis cells against saved results; the showcase is plain prose and an image.
+Render the app guide separately with `quarto render user_guide.qmd`. The Pages workflow publishes the
+committed HTML and PDFs.
 
 ## The physics in one paragraph per phase
 
@@ -141,7 +171,7 @@ src/thin_film/
   recording.py           # record a run as compact frames for replay (exactly reproducible)
 scripts/run_phase{1..4}.py   # regenerate everything in results/
 scripts/run_por_yield.py      # single-wafer pass rates behind the specs
-report/                       # report.qmd (findings) + user_guide.qmd (app guide), rendered to HTML
+report/                       # report.qmd + showcase.qmd -> HTML/PDF; user_guide.qmd -> HTML
 notebooks/0{1..5}_*.ipynb     # step-by-step guides for beginners (local or Google Colab), see below
 app/streamlit_app.py          # app: recipe sidebar, run/compare, lot history
 app/fab_player.html           # in-browser replay: stepper, chamber, readouts, in-situ / SEM / AFM views

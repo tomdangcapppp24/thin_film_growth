@@ -27,10 +27,15 @@ jobs:
           test -s report/report.html
           test -s report/user_guide.html
           test -s report/beginners_guide.html
+          test -s report/report.pdf
+          test -s report/showcase.pdf
+          test -s report/showcase.html
           mkdir -p _site
           cp report/report.html _site/index.html
           cp report/user_guide.html _site/user-guide.html
           cp report/beginners_guide.html _site/beginners-guide.html
+          cp report/report.pdf report/showcase.pdf report/showcase.html _site/
+          cp report/theme-base.css report/project-theme.css _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

@@ -8,3 +8,11 @@ __pycache__/
 
 # Local Jupyter kernels/settings created by the launcher (scripts/launch.py)
 .jupyter_data/
+
+# Quarto intermediates; keep the QMD sources and final HTML/PDF reports.
+.quarto/
+report/*_files/
+report/*.typ
+
+/.quarto/
+**/*.quarto_ipynb
